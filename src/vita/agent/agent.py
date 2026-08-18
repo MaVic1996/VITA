@@ -34,13 +34,7 @@ class Agent:
 
     def _tool_definitions(self) -> list[dict[str, str]]:
         return [
-            { "type": "function",
-              "function": {
-                "name": tool.name,   
-                "description": tool.description,
-                "parameters": tool.parameters,
-              },
-            }
+            tool.definition()
             for tool in self.tools.all_tools()
         ]
 
@@ -51,5 +45,7 @@ class Agent:
         arguments = function.get("arguments", {})
 
         tool = self.tools.get_tool(name)
-        result = tool.function(**arguments)
+        validated_arguments = tool.args_model.model_validate(arguments)
+        result = tool.function(**validated_arguments.model_dump())
+
         return str(result)

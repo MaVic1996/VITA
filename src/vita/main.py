@@ -1,7 +1,13 @@
 import typer
-from vita.tools.time import get_current_time
+from vita.tools.time import get_current_time, GetCurrentTimeArgs
 from vita.calendar.google import GoogleCalendarClient
-from vita.tools.calendar import CalendarTool
+from vita.tools.calendar import (
+    CalendarTool,
+    CreateEventArgs,
+    DeleteEventArgs,
+    ListEventsArgs,
+    UpdateEventArgs,
+)
 from vita.agent.agent import Agent
 from vita.llm.ollama import OllamaClient
 from vita.tools.registry import ToolRegistry, Tool
@@ -10,39 +16,61 @@ def main() -> None:
     calendar_client = GoogleCalendarClient()
     calendar_tool = CalendarTool(calendar_client)
     tools = ToolRegistry()
-
+    
     tools.register_tool(
         Tool(
             name="get_current_time",
             description="Get the current local date and time.",
             function=get_current_time,
-            parameters={
-                "type": "object",
-                "properties": {},
-                "required": [],
-            },
+            args_model=GetCurrentTimeArgs
         )
     )
 
     tools.register_tool(
         Tool(
             name="calendar_list_events",
-            description="List calendar events between two dates.",
+            description=(
+                "List the user's calendar events "
+                "between two dates."
+            ),
             function=calendar_tool.list_events,
-            parameters={
-                "type": "object",
-                "properties": {
-                      "start": {
-                          "type": "string",
-                              "description": "Start of the period in ISO 8601 format.",
-                          },
-                      "end": {
-                          "type": "string",
-                          "description": "End of the period in ISO 8601 format.",
-                      },
-                  },
-                "required": ["start", "end"],
-            },
+            args_model=ListEventsArgs,
+        )
+    )
+
+    tools.register_tool(
+        Tool(
+            name="calendar_create_event",
+            description=(
+                "Create a new event in the user's "
+                "Google Calendar."
+            ),
+            function=calendar_tool.create_event,
+            args_model=CreateEventArgs,
+        )
+    )
+
+    tools.register_tool(
+        Tool(
+            name="calendar_update_event",
+            description=(
+                "Update an existing event in the user's "
+                "Google Calendar."
+            ),
+            function=calendar_tool.update_event,
+            args_model=UpdateEventArgs,
+        )
+    )
+
+    tools.register_tool(
+        Tool(
+            name="calendar_delete_event",
+            description=(
+                "Delete an existing event from the user's "
+                "Google Calendar."
+            ),
+            function=calendar_tool.delete_event,
+            args_model=DeleteEventArgs,
         )
     )
     agent = Agent(OllamaClient(), tools)

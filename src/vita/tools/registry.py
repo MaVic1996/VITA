@@ -1,13 +1,24 @@
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
+from pydantic import BaseModel
 
 @dataclass
 class Tool:
     name: str
     description: str
     function: Callable[..., Any]
-    parameters: dict[str, Any]
+    args_model: type[BaseModel]
+
+    def definition(self) -> dict[str, Any]:
+        return {
+            "type": "function",
+            "function": {
+                "name": self.name,
+                "description": self.description,
+                "parameters": self.args_model.model_json_schema(),
+            }
+        }
 
 
 class ToolRegistry:
