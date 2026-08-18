@@ -1,13 +1,18 @@
-
+from datetime import datetime
 from vita.llm.ollama import OllamaClient
 from vita.tools.registry import ToolRegistry
-
+from vita.agent.system_prompt import build_system_prompt
 class Agent:
 
     def __init__(self, llm_client: OllamaClient, tools: ToolRegistry) -> None:
         self.llm_client = llm_client
         self.tools = tools
-        self.messages: list[dict[str, str]] = []
+        self.messages: list[dict[str, str]] =  [
+            {
+                "role": "system",
+                "content": build_system_prompt(),
+            }
+        ]
 
     def chat(self, user_message: str) -> str:
         self.messages.append({"role": "user", "content": user_message})

@@ -1,10 +1,14 @@
 import typer
 from vita.tools.time import get_current_time
+from vita.calendar.google import GoogleCalendarClient
+from vita.tools.calendar import CalendarTool
 from vita.agent.agent import Agent
 from vita.llm.ollama import OllamaClient
 from vita.tools.registry import ToolRegistry, Tool
 
 def main() -> None:
+    calendar_client = GoogleCalendarClient()
+    calendar_tool = CalendarTool(calendar_client)
     tools = ToolRegistry()
 
     tools.register_tool(
@@ -16,6 +20,28 @@ def main() -> None:
                 "type": "object",
                 "properties": {},
                 "required": [],
+            },
+        )
+    )
+
+    tools.register_tool(
+        Tool(
+            name="calendar_list_events",
+            description="List calendar events between two dates.",
+            function=calendar_tool.list_events,
+            parameters={
+                "type": "object",
+                "properties": {
+                      "start": {
+                          "type": "string",
+                              "description": "Start of the period in ISO 8601 format.",
+                          },
+                      "end": {
+                          "type": "string",
+                          "description": "End of the period in ISO 8601 format.",
+                      },
+                  },
+                "required": ["start", "end"],
             },
         )
     )
