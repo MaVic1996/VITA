@@ -1,8 +1,25 @@
 import typer
+from vita.tools.time import get_current_time
+from vita.agent.agent import Agent
 from vita.llm.ollama import OllamaClient
+from vita.tools.registry import ToolRegistry, Tool
 
 def main() -> None:
-    client = OllamaClient()
+    tools = ToolRegistry()
+
+    tools.register_tool(
+        Tool(
+            name="get_current_time",
+            description="Get the current local date and time.",
+            function=get_current_time,
+            parameters={
+                "type": "object",
+                "properties": {},
+                "required": [],
+            },
+        )
+    )
+    agent = Agent(OllamaClient(), tools)
     typer.echo("Bienvenido a tu asistente V.I.T.A. ¿En qué puedo ayudarte hoy?")
 
     while True:
@@ -19,7 +36,7 @@ def main() -> None:
         if not message.strip():
             continue
 
-        response = client.chat(message)
+        response = agent.chat(message)
         typer.echo(f"\n{response}\n")
 
 if __name__ == "__main__":
