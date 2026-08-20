@@ -1,12 +1,15 @@
-from datetime import datetime
+from vita.agent.system_prompt import build_system_prompt
+from vita.dates.resolver import RelativeDateResolver
 from vita.llm.ollama import OllamaClient
 from vita.tools.registry import ToolRegistry
-from vita.agent.system_prompt import build_system_prompt
+
+
 class Agent:
 
     def __init__(self, llm_client: OllamaClient, tools: ToolRegistry) -> None:
         self.llm_client = llm_client
         self.tools = tools
+        self.date_resolver = RelativeDateResolver()
         self.messages: list[dict[str, str]] =  [
             {
                 "role": "system",
@@ -15,6 +18,10 @@ class Agent:
         ]
 
     def chat(self, user_message: str) -> str:
+        date_context = self.date_resolver.context_for(user_message)
+        if date_context:
+            user_message = f"{user_message}\n\n{date_context}"
+
         self.messages.append({"role": "user", "content": user_message})
 
         while True:

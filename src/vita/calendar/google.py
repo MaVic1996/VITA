@@ -1,5 +1,6 @@
 from pathlib import Path
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from typing import Any
 
 from google.auth.transport.requests import Request
@@ -10,6 +11,7 @@ from googleapiclient.discovery import Resource, build
 
 class GoogleCalendarClient:
     SCOPES = ["https://www.googleapis.com/auth/calendar"]
+    TIMEZONE = ZoneInfo("Europe/Madrid")
 
     def __init__(
         self,
@@ -95,19 +97,26 @@ class GoogleCalendarClient:
         service = self._get_service()
         service.events().delete(calendarId="primary", eventId=event_id).execute()
 
-    @staticmethod
-    def _ensure_rfc3339(dt: str) -> str:
+    @classmethod
+    def _ensure_rfc3339(cls, dt: str) -> str:
         parsed = datetime.fromisoformat(dt)
+
         if parsed.tzinfo is None:
-            parsed = parsed.replace(tzinfo=timezone.utc)
+            parsed = parsed.replace(tzinfo=cls.TIMEZONE)
+
         return parsed.isoformat()
 
-    @staticmethod
-    def _format_datetime(dt: str) -> dict:
+    @classmethod
+    def _format_datetime(cls, dt: str) -> dict[str, str]:
         if "T" not in dt:
-            return { "date": dt }
+            return {"date": dt}
 
-        return { "dateTime": dt }
+        parsed = datetime.fromisoformat(dt)
+
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=cls.TIMEZONE)
+
+        return {"dateTime": parsed.isoformat()}
 
     @staticmethod
     def _normalize_event(event: dict) -> dict:
