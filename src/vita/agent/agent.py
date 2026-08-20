@@ -2,18 +2,18 @@ from vita.agent.system_prompt import build_system_prompt
 from vita.dates.resolver import RelativeDateResolver
 from vita.llm.ollama import OllamaClient
 from vita.tools.registry import ToolRegistry
-
+from vita.memory.models import UserPreferences
 
 class Agent:
 
-    def __init__(self, llm_client: OllamaClient, tools: ToolRegistry) -> None:
+    def __init__(self, llm_client: OllamaClient, tools: ToolRegistry, preferences: UserPreferences) -> None:
         self.llm_client = llm_client
         self.tools = tools
         self.date_resolver = RelativeDateResolver()
         self.messages: list[dict[str, str]] =  [
             {
                 "role": "system",
-                "content": build_system_prompt(),
+                "content": build_system_prompt(preferences),
             }
         ]
 
