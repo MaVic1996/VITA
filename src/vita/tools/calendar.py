@@ -1,6 +1,7 @@
-from datetime import datetime
 from pydantic import BaseModel, Field
+
 from vita.calendar.google import GoogleCalendarClient
+
 
 class ListEventsArgs(BaseModel):
     start: str = Field(

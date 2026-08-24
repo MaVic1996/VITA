@@ -1,23 +1,22 @@
 from vita.agent.system_prompt import build_system_prompt
 from vita.dates.resolver import RelativeDateResolver
 from vita.llm.ollama import OllamaClient
+from vita.memory.repository import PreferencesRepository
 from vita.tools.registry import ToolRegistry
-from vita.memory.models import UserPreferences
+
 
 class Agent:
 
-    def __init__(self, llm_client: OllamaClient, tools: ToolRegistry, preferences: UserPreferences) -> None:
+    def __init__(self, llm_client: OllamaClient, tools: ToolRegistry, preferences_repository: PreferencesRepository) -> None:
         self.llm_client = llm_client
         self.tools = tools
-        self.date_resolver = RelativeDateResolver()
-        self.messages: list[dict[str, str]] =  [
-            {
-                "role": "system",
-                "content": build_system_prompt(preferences),
-            }
-        ]
+        self.preferences_repository = preferences_repository
+        self.messages = [{"role": "system", "content": ""}]
+        self._refresh_preferences()
 
     def chat(self, user_message: str) -> str:
+        self._refresh_preferences()
+        
         date_context = self.date_resolver.context_for(user_message)
         if date_context:
             user_message = f"{user_message}\n\n{date_context}"
@@ -38,6 +37,12 @@ class Agent:
             for tool_call in tool_calls:
                 result = self._execute_tool(tool_call)
                 self.messages.append({"role": "tool", "content": result})
+
+
+    def _refresh_preferences(self) -> None:
+        preferences = self.preferences_repository.load()
+        self.date_resolver = RelativeDateResolver(preferences.timezone)
+        self.messages[0]["content"] = build_system_prompt(preferences)
 
     def _tool_definitions(self) -> list[dict[str, str]]:
         return [

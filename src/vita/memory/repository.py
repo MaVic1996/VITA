@@ -2,6 +2,7 @@ from typing import Protocol
 
 from vita.memory.models import UserPreferences
 
+
 class PreferencesRepository(Protocol):
     """Protocol for a repository that manages user preferences."""
 

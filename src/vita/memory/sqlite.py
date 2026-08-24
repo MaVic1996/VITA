@@ -1,11 +1,16 @@
 import sqlite3
+from pathlib import Path
+
 from vita.memory.models import UserPreferences
+
 
 class SQLitePreferencesRepository:
     DEFAULT_DB_PATH = "data/vita.db"
 
     def __init__(self, db_path: str = DEFAULT_DB_PATH) -> None:
         self.db_path = db_path
+        Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
+        
         self._initialize_database()
 
 

@@ -1,7 +1,7 @@
+from datetime import datetime
 from pathlib import Path
-from datetime import datetime, timezone
+from typing import Any, ClassVar
 from zoneinfo import ZoneInfo
-from typing import Any
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -10,8 +10,9 @@ from googleapiclient.discovery import Resource, build
 
 
 class GoogleCalendarClient:
-    SCOPES = ["https://www.googleapis.com/auth/calendar"]
-    TIMEZONE = ZoneInfo("Europe/Madrid")
+
+    SCOPES: ClassVar[list[str]] = ["https://www.googleapis.com/auth/calendar"]
+    TIMEZONE: ClassVar[ZoneInfo] = ZoneInfo("Europe/Madrid")
 
     def __init__(
         self,

@@ -1,20 +1,39 @@
-from vita.tools.time import get_current_time, GetCurrentTimeArgs
-from vita.tools.registry import ToolRegistry, Tool
-from vita.tools.calendar import (
-    CalendarTool,
-    CreateEventArgs,
-    DeleteEventArgs,
-    ListEventsArgs,
-    UpdateEventArgs,
-)
 from vita.calendar.google import GoogleCalendarClient
+from vita.tools.calendar import (
+      CalendarTool,
+      CreateEventArgs,
+      DeleteEventArgs,
+      ListEventsArgs,
+      UpdateEventArgs,
+)
+from vita.tools.preferences import (
+      PreferencesRepository,
+      PreferencesTool,
+      UpdatePreferencesArgs,
+)
+from vita.tools.registry import Tool, ToolRegistry
+from vita.tools.time import GetCurrentTimeArgs, get_current_time
+
 
 def build_tool_registry(
     calendar_client: GoogleCalendarClient,
+    preferences_repository: PreferencesRepository,
 ) -> ToolRegistry:
-      calendar_client = GoogleCalendarClient()
       calendar_tool = CalendarTool(calendar_client)
+      preferences_tool = PreferencesTool(preferences_repository)
       tools = ToolRegistry()
+
+      tools.register_tool(
+          Tool(
+              name="preferences_update",
+              description=(
+                "Update the user's saved preferences, such as their name, timezone, "
+                "preferred language, or default calendar event duration."
+              ),
+              function= preferences_tool.update_preferences,
+              args_model=UpdatePreferencesArgs
+          )
+      )
         
       tools.register_tool(
           Tool(
@@ -72,3 +91,5 @@ def build_tool_registry(
               args_model=DeleteEventArgs,
           )
       )
+
+      return tools

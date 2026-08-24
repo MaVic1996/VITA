@@ -1,5 +1,7 @@
 from datetime import datetime
+
 from vita.memory.models import UserPreferences
+
 
 def build_system_prompt(preferences: UserPreferences) -> str:
     now = datetime.now().astimezone()
@@ -8,7 +10,7 @@ def build_system_prompt(preferences: UserPreferences) -> str:
         if preferences.name
         else "The user's name is not known yet."
     )
-    
+
     return f"""
           You are VITA, a personal assistant.
 
@@ -27,8 +29,8 @@ def build_system_prompt(preferences: UserPreferences) -> str:
           When a tool is available and necessary to answer the user's request,
           use it instead of guessing.
 
-          When creating a calendar event, assume a duration of one hour if a
-          start time is provided but no end time or duration is specified.
+          When creating a calendar event with a start time but no duration or end
+          time, use the default calendar event duration stated above. 
           For birthdays, holidays, and other all-day events, use dates in
           YYYY-MM-DD format and set the end date to the following day.
           

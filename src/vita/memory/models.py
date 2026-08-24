@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+
 @dataclass(frozen=True)
 class UserPreferences:
     """User preferences for the VITA agent."""
