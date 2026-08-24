@@ -77,6 +77,8 @@ def build_tool_registry(
               ),
               function=calendar_tool.update_event,
               args_model=UpdateEventArgs,
+              requires_confirmation=True,
+              confirmation_message="Voy a actualizar el evento seleccionado.",
           )
       )
   
@@ -89,6 +91,8 @@ def build_tool_registry(
               ),
               function=calendar_tool.delete_event,
               args_model=DeleteEventArgs,
+              requires_confirmation=True,
+              confirmation_message="Voy a eliminar el evento seleccionado.",
           )
       )
 

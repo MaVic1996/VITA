@@ -11,6 +11,8 @@ class Tool:
     description: str
     function: Callable[..., Any]
     args_model: type[BaseModel]
+    requires_confirmation: bool = False
+    confirmation_message: str | None = None
 
     def definition(self) -> dict[str, Any]:
         return {
