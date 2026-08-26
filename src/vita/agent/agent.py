@@ -4,6 +4,8 @@ from vita.dates.resolver import RelativeDateResolver
 from vita.llm.ollama import OllamaClient
 from vita.memory.repository import PreferencesRepository
 from vita.tools.registry import ToolRegistry
+
+
 class Agent:
 
     def __init__(self, llm_client: OllamaClient, tools: ToolRegistry, preferences_repository: PreferencesRepository) -> None:
