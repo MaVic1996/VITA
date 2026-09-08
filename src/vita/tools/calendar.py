@@ -71,8 +71,6 @@ class CalendarTool:
         start: str,
         end: str,
     ) -> list[dict]:
-        print("START:", start, type(start))
-        print("END:", end, type(end))
         return self.calendar.list_events(
             start=start,
             end=end,

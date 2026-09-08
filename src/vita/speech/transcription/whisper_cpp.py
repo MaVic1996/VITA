@@ -2,7 +2,7 @@ import subprocess
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from vita.speech.transcriber import Transcriber
+from vita.speech.transcription.transcriber import Transcriber
 
 
 class WhisperCppTranscriber(Transcriber):
