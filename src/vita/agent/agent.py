@@ -1,14 +1,19 @@
 from vita.agent.confirmation import PendingToolCall
 from vita.agent.system_prompt import build_system_prompt
 from vita.dates.resolver import RelativeDateResolver
-from vita.llm.ollama import OllamaClient
+from vita.llm.client import ChatClient
 from vita.memory.repository import PreferencesRepository
 from vita.tools.registry import ToolRegistry
 
 
 class Agent:
 
-    def __init__(self, llm_client: OllamaClient, tools: ToolRegistry, preferences_repository: PreferencesRepository) -> None:
+    def __init__(
+        self,
+        llm_client: ChatClient,
+        tools: ToolRegistry,
+        preferences_repository: PreferencesRepository,
+    ) -> None:
         self.llm_client = llm_client
         self.tools = tools
         self.pending_tool_call: PendingToolCall | None = None

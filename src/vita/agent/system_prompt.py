@@ -1,10 +1,11 @@
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from vita.memory.models import UserPreferences
 
 
 def build_system_prompt(preferences: UserPreferences) -> str:
-    now = datetime.now().astimezone()
+    now = datetime.now(ZoneInfo(preferences.timezone))
     name_context = (
         f"The user's name is {preferences.name}."
         if preferences.name

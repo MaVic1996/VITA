@@ -19,7 +19,7 @@ def build_tool_registry(
     calendar_client: GoogleCalendarClient,
     preferences_repository: PreferencesRepository,
 ) -> ToolRegistry:
-      calendar_tool = CalendarTool(calendar_client)
+      calendar_tool = CalendarTool(calendar_client, preferences_repository)
       preferences_tool = PreferencesTool(preferences_repository)
       tools = ToolRegistry()
 

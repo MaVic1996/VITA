@@ -1,6 +1,9 @@
+from zoneinfo import ZoneInfo
+
 from pydantic import BaseModel, Field
 
 from vita.calendar.google import GoogleCalendarClient
+from vita.memory.repository import PreferencesRepository
 
 
 class ListEventsArgs(BaseModel):
@@ -63,8 +66,13 @@ class DeleteEventArgs(BaseModel):
 
 
 class CalendarTool:
-    def __init__(self, calendar: GoogleCalendarClient) -> None:
+    def __init__(
+        self,
+        calendar: GoogleCalendarClient,
+        preferences_repository: PreferencesRepository,
+    ) -> None:
         self.calendar = calendar
+        self.preferences_repository = preferences_repository
 
     def list_events(
         self,
@@ -74,6 +82,7 @@ class CalendarTool:
         return self.calendar.list_events(
             start=start,
             end=end,
+            timezone=self._user_timezone(),
         )
 
     def create_event(
@@ -91,6 +100,7 @@ class CalendarTool:
             end=end,
             description=description,
             location=location,
+            timezone=self._user_timezone(),
         )
 
     def update_event(
@@ -110,9 +120,13 @@ class CalendarTool:
             end=end,
             description=description,
             location=location,
+            timezone=self._user_timezone(),
         )
 
     def delete_event(self, event_id: str) -> str:
         self.calendar.delete_event(event_id)
 
         return f"Event with ID {event_id} has been deleted."
+
+    def _user_timezone(self) -> ZoneInfo:
+        return ZoneInfo(self.preferences_repository.load().timezone)
