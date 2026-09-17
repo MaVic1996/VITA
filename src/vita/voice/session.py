@@ -20,16 +20,19 @@ class VoiceSession:
         transcriber: Transcriber,
         synthesizer: SpeechSynthesizer,
         player: AudioPlayer,
+        welcome_message: str,
     ) -> None:
         self.agent = agent
         self.recorder = recorder
         self.transcriber = transcriber
         self.synthesizer = synthesizer
         self.player = player
+        self.welcome_message = welcome_message
 
     def run(self) -> None:
         typer.echo("Iniciando sesión de voz.")
-
+        typer.echo(self.welcome_message)
+        self._speak(self.welcome_message)
         while True:
             try:
                 command = input(
@@ -60,10 +63,14 @@ class VoiceSession:
                 response = self.agent.chat(transcription)
                 typer.echo(f"\n{response}\n")
 
-                response_audio_path = Path(temp_dir) / "response.wav"
-                self.synthesizer.synthesize(response, response_audio_path)
-                self.player.play(response_audio_path)
+                self._speak(response)
             except (ValueError, FileNotFoundError, RuntimeError) as error:
                 typer.echo(f"Error al procesar el audio: {error}", err=True)
             except KeyboardInterrupt:
                 typer.echo("\nGrabación interrumpida.")
+
+    def _speak(self, message: str) -> None:
+        with TemporaryDirectory() as temp_dir:
+            audio_path = Path(temp_dir) / "message.wav"
+            self.synthesizer.synthesize(message, audio_path)
+            self.player.play(audio_path)

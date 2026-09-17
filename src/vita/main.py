@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 
 from vita.agent.agent import Agent
 from vita.calendar.google import GoogleCalendarClient
+from vita.calendar.briefing import DailyBriefingService
 from vita.llm.ollama import OllamaClient
 from vita.memory.sqlite import SQLitePreferencesRepository
 from vita.speech.factory import build_piper_synthesizer, build_whisper_cpp_transcriber
@@ -33,11 +34,12 @@ def main(
     voice: Annotated[bool, typer.Option(
         "--voice",
         help="Start an interactive voice session.",
-    )] = False,
+    )] = False
 ) -> None:
     preferences_repository = SQLitePreferencesRepository()
+    calendar_client = GoogleCalendarClient()
     tools = build_tool_registry(
-        calendar_client=GoogleCalendarClient(),
+        calendar_client=calendar_client,
         preferences_repository=preferences_repository,
     )
     ollama_client = OllamaClient(
@@ -47,9 +49,15 @@ def main(
 
     agent = Agent(ollama_client, tools, preferences_repository=preferences_repository)
 
-    if sum(value is not None for value in (audio, record)) + voice > 1:
-        raise typer.BadParameter("Use only one of --audio, --record, or --voice.")
+    if sum(value is not None for value in (audio, record)) + voice  > 1:
+        raise typer.BadParameter("Use only one of --audio, --record, or --voice")
 
+
+    service = DailyBriefingService(
+        calendar_client=calendar_client,
+        preferences_repository=preferences_repository,
+    )
+    briefing_text = service.build()
     if voice:
         try:
             return VoiceSession(
@@ -58,6 +66,7 @@ def main(
                 transcriber=build_whisper_cpp_transcriber(),
                 synthesizer=build_piper_synthesizer(),
                 player=SoundDeviceAudioPlayer(),
+                welcome_message=briefing_text,
             ).run()
         except (ValueError, FileNotFoundError) as error:
             typer.echo(f"Error al iniciar el modo voz: {error}", err=True)
@@ -82,7 +91,9 @@ def main(
 
         return
 
-    typer.echo("Bienvenido a tu asistente V.I.T.A. ¿En qué puedo ayudarte hoy?")
+    typer.echo("Bienvenido a tu asistente V.I.T.A.")
+    typer.echo(briefing_text)
+    typer.echo(" ¿En qué puedo ayudarte hoy?")
 
     while True:
         try: 

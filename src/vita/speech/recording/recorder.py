@@ -14,7 +14,7 @@ class AudioRecorder(Protocol):
         self,
         output_path: Path,
         *,
-        silence_duration: float = 1.2,
+        silence_duration: float = 2.5,
         max_duration: float = 20.0,
         rms_threshold: float = 500.0,
     ) -> None:
