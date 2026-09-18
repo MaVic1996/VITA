@@ -1,5 +1,5 @@
-from vita.memory.models import UserPreferences
-from vita.memory.sqlite import SQLitePreferencesRepository
+from vita.memory.preferences.models import UserPreferences
+from vita.memory.preferences.sqlite import SQLitePreferencesRepository
 
 
 def test_load_returns_default_preferences_when_empty(tmp_path) -> None:

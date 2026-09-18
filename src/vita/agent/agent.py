@@ -1,8 +1,12 @@
+from datetime import UTC, datetime
+
 from vita.agent.confirmation import PendingToolCall
 from vita.agent.system_prompt import build_system_prompt
 from vita.dates.resolver import RelativeDateResolver
 from vita.llm.client import ChatClient
-from vita.memory.repository import PreferencesRepository
+from vita.memory.conversation.models import ConversationMessage
+from vita.memory.conversation.repository import ConversationRepository
+from vita.memory.preferences.repository import PreferencesRepository
 from vita.tools.registry import ToolRegistry
 
 
@@ -13,12 +17,21 @@ class Agent:
         llm_client: ChatClient,
         tools: ToolRegistry,
         preferences_repository: PreferencesRepository,
+        conversation_repository: ConversationRepository,
     ) -> None:
         self.llm_client = llm_client
         self.tools = tools
         self.pending_tool_call: PendingToolCall | None = None
         self.preferences_repository = preferences_repository
+        self.conversation_repository = conversation_repository
         self.messages = [{"role": "system", "content": ""}]
+        self.messages.extend(
+            {
+                "role": message.role,
+                "content": message.content,
+            }
+            for message in self.conversation_repository.get_last_messages()
+        )
         self._refresh_preferences()
 
     def chat(self, user_message: str) -> str:
@@ -27,10 +40,11 @@ class Agent:
 
         self._refresh_preferences()
 
+        original_user_message = user_message
         date_context = self.date_resolver.context_for(user_message)
         if date_context:
             user_message = f"{user_message}\n\n{date_context}"
-
+        self._save_message("user", original_user_message)
         self.messages.append({"role": "user", "content": user_message})
 
         while True:
@@ -40,6 +54,7 @@ class Agent:
             if not tool_calls:
                 content = response.get("content", "")
                 self.messages.append({"role": "assistant", "content": content})
+                self._save_message("assistant", content)
                 return content
 
             for tool_call in tool_calls:
@@ -66,6 +81,7 @@ class Agent:
                     self.messages.append(
                         {"role": "assistant", "content": confirmation}
                     )
+                    self._save_message("assistant", confirmation)
                     return confirmation
             # Solo si ninguna tool necesita confirmación, guardar la respuesta del LLM
             # y ejecutar las tools normalmente.
@@ -75,7 +91,18 @@ class Agent:
                 result = self._execute_tool(tool_call)
                 self.messages.append({"role": "tool", "content": result})
 
+
+    def _save_message(self, role: str, content: str) -> None:
+        self.conversation_repository.save(
+            ConversationMessage(
+                role=role,
+                content=content,
+                created_at=datetime.now(UTC),
+            )
+        )
+
     def _handle_pending_confirmation_tool_call(self, user_message: str) -> str:
+        self._save_message("user", user_message)
         self.messages.append({"role": "user", "content": user_message})
 
         normalized_message = user_message.strip().lower()
@@ -97,6 +124,7 @@ class Agent:
             f"{pending_tool_call.confirmation_message} "
             "Responde “sí” para confirmar o “no” para cancelar."
             )
+        self._save_message("assistant", response)
         self.messages.append({"role": "assistant", "content": response})
 
         return response

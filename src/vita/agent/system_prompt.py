@@ -1,7 +1,7 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from vita.memory.models import UserPreferences
+from vita.memory.preferences.models import UserPreferences
 
 
 def build_system_prompt(preferences: UserPreferences) -> str:

@@ -2,7 +2,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from vita.calendar.briefing import DailyBriefingService
-from vita.memory.models import UserPreferences
+from vita.memory.preferences.models import UserPreferences
 
 
 class FakeCalendarClient:

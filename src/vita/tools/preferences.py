@@ -4,8 +4,8 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from vita.memory.models import UserPreferences
-from vita.memory.repository import PreferencesRepository
+from vita.memory.preferences.models import UserPreferences
+from vita.memory.preferences.repository import PreferencesRepository
 
 
 class UpdatePreferencesArgs(BaseModel):

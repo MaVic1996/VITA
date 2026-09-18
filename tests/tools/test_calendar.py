@@ -1,6 +1,6 @@
 from zoneinfo import ZoneInfo
 
-from vita.memory.models import UserPreferences
+from vita.memory.preferences.models import UserPreferences
 from vita.tools.calendar import CalendarTool
 
 

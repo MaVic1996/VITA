@@ -3,7 +3,8 @@ from collections.abc import Callable
 from pydantic import BaseModel
 
 from vita.agent.agent import Agent
-from vita.memory.sqlite import SQLitePreferencesRepository
+from vita.memory.conversation.sqlite import SQLiteConversationRepository
+from vita.memory.preferences.sqlite import SQLitePreferencesRepository
 from vita.tools.registry import Tool, ToolRegistry
 
 
@@ -42,8 +43,14 @@ def build_agent(
         )
     )
 
-    repository = SQLitePreferencesRepository(tmp_path / "vita.db")
-    return Agent(FakeLLMClient(), tools, repository)
+    preferences_repository = SQLitePreferencesRepository(tmp_path / "vita.db")
+    conversation_repository = SQLiteConversationRepository(tmp_path / "vita.db")
+    return Agent(
+        FakeLLMClient(),
+        tools,
+        preferences_repository,
+        conversation_repository,
+    )
 
 
 def test_rejected_action_is_not_executed(tmp_path) -> None:

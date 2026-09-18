@@ -7,10 +7,11 @@ import typer
 from dotenv import load_dotenv
 
 from vita.agent.agent import Agent
-from vita.calendar.google import GoogleCalendarClient
 from vita.calendar.briefing import DailyBriefingService
+from vita.calendar.google import GoogleCalendarClient
 from vita.llm.ollama import OllamaClient
-from vita.memory.sqlite import SQLitePreferencesRepository
+from vita.memory.conversation.sqlite import SQLiteConversationRepository
+from vita.memory.preferences.sqlite import SQLitePreferencesRepository
 from vita.speech.factory import build_piper_synthesizer, build_whisper_cpp_transcriber
 from vita.speech.playback.sounddevice import SoundDeviceAudioPlayer
 from vita.speech.recording.sounddevice import SoundDeviceRecorder
@@ -36,6 +37,7 @@ def main(
         help="Start an interactive voice session.",
     )] = False
 ) -> None:
+    conversation_repository = SQLiteConversationRepository()
     preferences_repository = SQLitePreferencesRepository()
     calendar_client = GoogleCalendarClient()
     tools = build_tool_registry(
@@ -47,7 +49,12 @@ def main(
         base_url=os.environ.get("VITA_OLLAMA_BASE_URL", OllamaClient.DEFAULT_BASE_URL),
     )
 
-    agent = Agent(ollama_client, tools, preferences_repository=preferences_repository)
+    agent = Agent(
+        ollama_client,
+        tools,
+        preferences_repository=preferences_repository,
+        conversation_repository=conversation_repository,
+    )
 
     if sum(value is not None for value in (audio, record)) + voice  > 1:
         raise typer.BadParameter("Use only one of --audio, --record, or --voice")

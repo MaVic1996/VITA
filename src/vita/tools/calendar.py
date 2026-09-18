@@ -3,7 +3,7 @@ from zoneinfo import ZoneInfo
 from pydantic import BaseModel, Field
 
 from vita.calendar.google import GoogleCalendarClient
-from vita.memory.repository import PreferencesRepository
+from vita.memory.preferences.repository import PreferencesRepository
 
 
 class ListEventsArgs(BaseModel):

@@ -1,8 +1,8 @@
 import pytest
 from pydantic import ValidationError
 
-from vita.memory.models import UserPreferences
-from vita.memory.sqlite import SQLitePreferencesRepository
+from vita.memory.preferences.models import UserPreferences
+from vita.memory.preferences.sqlite import SQLitePreferencesRepository
 from vita.tools.preferences import PreferencesTool, UpdatePreferencesArgs
 
 

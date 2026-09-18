@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from vita.memory.models import UserPreferences
+from vita.memory.preferences.models import UserPreferences
 
 
 class PreferencesRepository(Protocol):

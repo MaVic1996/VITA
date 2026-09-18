@@ -1,7 +1,7 @@
 import sqlite3
 from pathlib import Path
 
-from vita.memory.models import UserPreferences
+from vita.memory.preferences.models import UserPreferences
 
 
 class SQLitePreferencesRepository:

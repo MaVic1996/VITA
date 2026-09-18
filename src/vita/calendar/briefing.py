@@ -4,7 +4,7 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 from vita.calendar.google import GoogleCalendarClient
-from vita.memory.repository import PreferencesRepository
+from vita.memory.preferences.repository import PreferencesRepository
 
 
 class DailyBriefingService:
